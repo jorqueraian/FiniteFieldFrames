@@ -1,2 +1,39 @@
 # FiniteFieldFrames
 Julia implementation (using Oscar.jl) to work with frames of finite fields
+Everything is done on the level of gram matrices.
+
+## Instructions for Case U
+Pick base field. Examples below:
+```julia
+base_f = GF(5,3,"b");
+base_f = GF(5);
+```=
+Build quadradic extension
+```julia
+Kx, x = base_f["x"];
+# specify degree 2 irreducible polynomial.
+ff, a = finite_field(x^2+x+1, "a");
+```
+Specify `case="U"` when calling functions.
+An example is the following:
+```julia
+base_f = GF(5);
+Kx, x = base_f["x"];
+ff, a = finite_field(x^2+x+1, "a");
+hessa_sic = matrix(ff, [
+        1    1      1    -1 -1 -1 0 0 0;
+        0    0      0     1 a a^2 -1 -1*a -1*a^2;
+        -1  -1*a^2 -1*a   0 0 0 1 a^2 a]);
+hessa_gram = conjugate_transpose(hessa_sic)*hessa_sic;
+
+contains_simplex(3, hessa_gram, "U")
+```
+
+## Instructions for Case O
+Specify field, there are no restriction, other than it being finite.
+```julia
+ff = GF(5,3,"a");
+```
+Then specify `case="O"` when calling functions.
+
+
