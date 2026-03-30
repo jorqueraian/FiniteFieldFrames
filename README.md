@@ -3,11 +3,12 @@ Julia implementation (using Oscar.jl) to work with frames of finite fields
 Everything is done on the level of gram matrices.
 
 ## Instructions for Case U
-Pick base field. Examples below:
+Pick base field using Oscar. Examples below:
 ```julia
+using Oscar
 base_f = GF(5,3,"b");
 base_f = GF(5);
-```=
+```
 Build quadradic extension
 ```julia
 Kx, x = base_f["x"];
@@ -32,6 +33,7 @@ contains_simplex(3, hessa_gram, "U")
 ## Instructions for Case O
 Specify field, there are no restriction, other than it being finite.
 ```julia
+using Oscar
 ff = GF(5,3,"a");
 ```
 Then specify `case="O"` when calling functions.
