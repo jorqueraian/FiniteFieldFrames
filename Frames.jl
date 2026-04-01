@@ -241,11 +241,13 @@ function binder_finder(gram, case::String, verbose::Bool=false)::Matrix{Int}
     ###### Code created: July 2016
     ###### Last updated: March 27th, 2026
     #####################
+    # Notes: this may not return a complete binder.
 
     n = size(gram)[1];
     (n == size(gram)[2]) || throw(DomainError(size(gram),"gram must be square"));
 
     ff = gram.base_ring;
+    char = Int(characteristic(ff));
     etf_bool, a, b, c, d = is_ETF(gram, case);
     (etf_bool) || throw(DomainError(gram,"gram must be the gram of and ETF"));
 
@@ -254,13 +256,25 @@ function binder_finder(gram, case::String, verbose::Bool=false)::Matrix{Int}
     ##possible s's
     # Note that this also depends on 
     allss = [s for s in 2:d if a^2 == ff(s^2)*b];
+    bad_s_inds = findall(s->(gcd(char, s)==char || gcd(char, s+1)==char), allss);
+    good_s_inds = findall(s->(gcd(char, s)==1 && gcd(char, s+1)==1), allss);
+    if verbose
+        println("Unable to determine if the are any s-simplices for the following s's:")
+        println(allss[bad_s_inds])
+        println("This is becasue the characteristic of ff divides s or s+1.")
+    end
+    allss = allss[good_s_inds]
+
     ss1 = [s for s in allss if ff(s)==ff(allss[1])];
     ss2 = [s for s in allss if !(s in ss1)];
 
     simplices = [];
     for ss in [ss1, ss2]
+        if ss.size[1] == 0
+            continue
+        end
         if verbose
-            print("Checking simplex dim: ");
+            print("Checking simplex dims: ");
             println(ss);
         end
 
@@ -343,7 +357,7 @@ function binder_finder(gram, case::String, verbose::Bool=false)::Matrix{Int}
                     end
                 end
                 if verbose
-                    @printf("Found %i simplices with s=2\n", actual_simps.size[1])
+                    @printf("Found %i simplices with s=%i\n", actual_simps.size[1], s)
                 end
                 append!(simplices, jTuple[actual_simps,:]')
                 jTuple = jTuple[[i for i in 1:(jTuple.size[1]) if !(i in actual_simps)],:]
