@@ -25,22 +25,30 @@ function binder_finder(gram, case::String, verbose::Bool=false)::Matrix{Int}
     (!iszero(a)) || throw(DomainError(a,"need a != 0 for this implementation, try specifying a particular value for s as the first parameter"));
 
     ##possible s's
-    # Note that this also depends on 
     allss = [s for s in 2:d if a^2 == ff(s^2)*b];
-    bad_s_inds = findall(s->(gcd(char, s)==char || gcd(char, s+1)==char), allss);
+    bad_s_inds1 = findall(s->(gcd(char, s)==char), allss);
+    bad_s_inds2 = findall(s->(gcd(char, s+1)==char), allss);
     good_s_inds = findall(s->(gcd(char, s)==1 && gcd(char, s+1)==1), allss);
     if verbose
-        println("Unable to determine if the are any s-simplices for the following s's:")
-        println(allss[bad_s_inds])
-        println("This is becasue the characteristic of ff divides s or s+1.")
+        if bad_s_inds2.size[1] > 0
+            println("Skipping the following s's:")
+            println(allss[bad_s_inds2])
+            println("This is becasue the characteristic of ff divides s+1, and so no s-simplices can exist. ")
+        end
+        if bad_s_inds1.size[1] > 0
+            # this wont happen, because im already excluding a = 0.
+            println("Skipping the following s's:")
+            println(allss[bad_s_inds1])
+            println("This is becasue the characteristic of ff divides s, and so binder finder does not apply. This means the resulting binder may be incomplete.")
+        end
     end
-    allss = allss[good_s_inds]
+    allss = allss[good_s_inds];
 
     ss1 = [s for s in allss if ff(s)==ff(allss[1])];
     ss2 = [s for s in allss if !(s in ss1)];
 
     simplices = [];
-    for ss in [ss1, ss2]
+    for ss in [ss2, ss1]
         if ss.size[1] == 0
             continue
         end
