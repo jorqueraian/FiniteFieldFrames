@@ -167,7 +167,7 @@ function reconstruct_frame_from_gram(gram, case)
         (cong_bool, D) =  is_congruent(form, m);
         cong_bool || throw(DomainError(ff,"Ok i need to code in the option that you have a symmetric form congruent to the non-square case. I think because we are doing a field extension this wont happen. So if you see this i was wrong."));
 
-        Phi = tranpose(D)[1:d, :]
+        Phi = transpose(D)[1:d, :]
         (rank(Phi) == d) || throw(DomainError(Phi,"Something broke and I dont know why"));
 
     elseif case == "U"
