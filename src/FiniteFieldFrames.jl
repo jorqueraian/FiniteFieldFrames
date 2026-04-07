@@ -158,7 +158,7 @@ function reconstruct_frame_from_gram(gram::FqMatrix, case::String)::FqMatrix
             B[i,i] = sqrt(gram[i,i]- transpose(A[:,i])*A[:,i])
         else
             Kx, x = ff["x"];
-            B[i,i] = roots(x^(q+1)-gram[i,i]+conjugate_transpose(A[:,i])*A[:,i])[1]
+            B[i,i] = roots(x^(q+1)-gram[i,i]+(conjugate_transpose(matrix(A[:,i]))*A[:,i])[1])[1]
         end
     end
 
