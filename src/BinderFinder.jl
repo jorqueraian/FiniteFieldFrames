@@ -220,18 +220,15 @@ function binder_finder(s::Int, gram::FqMatrix, case::String)::Matrix{Int}
         end
         jTuple[actual_simps,:]
     else
-        # Probably a better way to do this
-        print("Warning: this implementation is slow and does not guarantee correct outputs when a != 0. Sorry\n\n")
+        Phi = reconstruct_frame_from_gram(gram, case);
+
         flat_binder = [];
         for inds in combinations(1:n, k)
+            maybe_simplex = Phi[:, inds];
             sub_gram = gram[inds,inds];
 
-            # This is a bit of an issue,
-            # it could be the case that the k vectors selected in the frame are LI
-            # but are degenerate, so just checking the rank of the gram
-            # is not enough. Not sure how to deal with this atm. But for now
-            # just assume this isnt an issue.
-            if rank(sub_gram) == s
+            # verify gram of a frame for a s-dim space
+            if rank(sub_gram) == s && rank(sub_gram) == rank(maybe_simplex)
                 tight_bool, c = is_frame_tight(sub_gram);
                 if tight_bool
                     simplex_row = zeros(Int, (n, 1));
