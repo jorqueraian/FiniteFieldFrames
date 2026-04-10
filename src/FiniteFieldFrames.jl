@@ -117,7 +117,7 @@ end
 
 
 function reconstruct_frame_from_gram(gram::FqMatrix, case::String)::FqMatrix
-    # see Thm 3.13 and 3.15 of citation needed.
+    # see Thm 3.13 and 3.15 of https://arxiv.org/pdf/2012.12977
     n = size(gram)[1];
     (n == size(gram)[2]) || throw(DomainError(size(gram),"gram must be square"));
 

@@ -5,16 +5,15 @@ import Base.Threads: @threads
 
 function binder_finder(gram::FqMatrix, case::String, verbose::Bool=false)::Matrix{Int}
     ####################
-    ###### Binder Finder
-    ###### Citation: "Equiangular tight frames that contain regular simplices,"
-    ###### Matthew Fickus, John Jasper, Emily J. King, Dustin G. Mixon, 2017
-    ###### Modified for finite fields by Ian Jorquera
-    ###### This is not a true finite field binder finder
+    ###### Binder Finder for frame over finite fields when a != 0
+    ###### Algorithm over R and C was original implemented in "Equiangular tight frames that contain regular simplices,"
+    ###### by Matthew Fickus, John Jasper, Emily J. King, Dustin G. Mixon, 2017
+    ###### Modified for finite fields by Ian Jorquera, based on the work in 
+    ###### 
+    ###### by Ian Jorquera, Emily J. King
     ######
-    ###### Code created: July 2016
     ###### Last updated: April 1st, 2026
     #####################
-    # Notes: this may not return a complete binder, better writeup coming soon
 
     n = size(gram)[1];
     (n == size(gram)[2]) || throw(DomainError(size(gram),"gram must be square"));
@@ -148,10 +147,11 @@ end
 
 
 function binder_finder(s::Int, gram::FqMatrix, case::String)::Matrix{Int}
-    # While the other version picks values of s automatically,
-    # you can specify a specific s here.
-    # This also allows a != 0, BUT it will give you the warning 
-    # that there is no way to verify what this code found is correct.
+    ####################
+    ###### This version of Binder Finder for frame over finite fields should really only be used when a = 0.
+    ###### A particular value for s must be provided.
+    ###### Last updated: April 1st, 2026
+    #####################
 
     n = size(gram)[1];
     k = s+1;
