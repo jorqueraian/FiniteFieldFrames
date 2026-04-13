@@ -28,10 +28,12 @@ function etf_from_pmod_diff_set(D, n, q)
     (e, b) = is_power(q);
     (is_prime(b)) || throw(DomainError(q, "input must be a prime power: q=p^k"));
     (gcd(n, q+1)==n) || throw(DomainError((n,q), "n must divide q+1"));
-    ## check that D is a p-mod difference set for Z/nZ
+    ## TODO: check that D is a p-mod difference set for Z/nZ
+    
     base_ff = GF(q);
     ## I dont think this is guaranteed to be the mult gen? 
     ## It would be as long as Oscar is using Conway Polynomials.
+    ## gen(K/L) is the generator of K with respect to L, but by default L=F_p, 
     base_ff_gen = gen(base_ff)
     Kx, x = base_ff["x"];
     ff = GF(x^2-base_ff_gen, "a");
@@ -94,4 +96,44 @@ function real_dx2d_etf(prime_power::Int)::Matrix{BigFloat}
     conf_mat[b^e+1, b^e+1] = a;
 
     conf_mat
+end
+
+function maximal_case_U_etf(modHadamard::FqMatrix, return_gram::Bool=true)::FqMatrix
+    ## Construction from https://arxiv.org/pdf/2506.20778
+    d = size(modHadamard)[1];
+    (d == size(modHadamard)[2]) || throw(DomainError(size(modHadamard),"Modular Hadamard must be square"));
+    
+    ff = modHadamard.base_ring;
+    p = characteristic(ff);
+    
+    base_ff = base_field(ff);
+
+    ## need root of x^2+1
+    ## this means that in the base field -1 is not a square.
+    (degree(ff) == 2) || throw(DomainError(ff,"in Case U, the provided field must be finite and must be a degree 2 extension"));
+    !is_square(base_ff(-1)) || throw(DomainError(ff,"The base field must have -1 be a non-square"));
+
+    (gcd(d-8, p) == p) || throw(DomainError(characteristic(modHadamard.base_ring),"must be that d = 8 mod p"));
+    iszero(transpose(modHadamard)*modHadamard - diagonal_matrix([ff(d) for i in 1:d])) || throw(DomainError(modHadamard,"input must be modular Hadamard, does not satsify H^t*H=dI"));
+    iszero(modHadamard.^2 .- ff(1)) || throw(DomainError(modHadamard,"input must be modular Hadamard, entries must square to 1."));
+
+
+    ffx, x = ff["x"];
+    ff_im = roots(x^2+1)[1]
+        
+
+    Phi = matrix(ff, zeros(Int, (d,d^2)));
+    for i in 1:d 
+        thing = matrix(ff, ones(Int, (d,1)));
+        thing[i] += (ff(-2)*(ff(1)+ff_im));
+        for j in 1:d 
+            ind = j+(i-1)*d;
+            Phi[:,ind] = matrix(modHadamard[:,j]).*thing;
+        end
+    end
+    if return_gram
+        conjugate_transpose(Phi)*Phi
+    else
+        Phi
+    end
 end
