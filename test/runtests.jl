@@ -46,35 +46,40 @@ end
 @testset "FiniteFieldFrames.jl" begin
     gram = etf_from_triangular_graph(12, 5);
     Phi = reconstruct_frame_from_gram(gram, case=:O);
-    @test transpose(Phi)*Phi == Phi.base_ring.(gram);
+    @test transpose(Phi)*Phi == Phi.base_ring.(gram)
 
     gram2 = real_etf_to_case_O(real_dx2d_etf_from_prime_power(3^4), Int((3^4+1)/2), 7);
     Phi2 = reconstruct_frame_from_gram(gram2, case=:O);
-    @test transpose(Phi2)*Phi2 == Phi2.base_ring.(gram2);
+    @test transpose(Phi2)*Phi2 == Phi2.base_ring.(gram2)
 
     Psi = etf_from_pmod_diff_set([0,4,6,7,8,11,13], 14, 27);
     gram3 = conjugate_transpose(Psi)*Psi;
     Phi3 = reconstruct_frame_from_gram(gram3, case=:U);
-    @test conjugate_transpose(Phi3)*Phi3 == Phi3.base_ring.(gram3);
+    @test conjugate_transpose(Phi3)*Phi3 == Phi3.base_ring.(gram3)
 end
 
 @testset "Constructions.jl" begin
     gram = etf_from_triangular_graph(12, 5);
     etf_bool, a, b, c, d = is_ETF(gram, case=:O);
-    @test (etf_bool && d == 12);
+    @test (etf_bool && d == 12)
 
     gram2 = real_etf_to_case_O(real_dx2d_etf_from_prime_power(3^4), Int((3^4+1)/2), 7);
     etf_bool2, a2, b2, c2, d2 = is_ETF(gram2, case=:O);
-    @test (etf_bool2 && d2 == Int((3^4+1)/2));
+    @test (etf_bool2 && d2 == Int((3^4+1)/2))
 
     Phi = etf_from_pmod_diff_set([0,4,6,7,8,11,13], 14, 27);
     gram2 = conjugate_transpose(Phi)*Phi;
     etf_bool3, a3, b3, c3, d3 = is_ETF(gram2, case=:U);
-    @test (etf_bool3 && d3 == 7);
+    @test (etf_bool3 && d3 == 7)
 
-    gram4 = etf_from_modular_hadamard(matrix(GF((3^3)^2), [1 1; 1 -1]), true);
+    gram4 = etf_from_modular_hadamard(matrix(GF((3^3)^2), [1 1; 1 -1]));
     etf_bool4, a4, b4, c4, d4 = is_ETF(gram4, case=:U);
-    @test (etf_bool4 && d4 == 2);
+    @test (etf_bool4 && d4 == 2)
+
+    r5 = 3;
+    gram5 = etf_from_singer_diff_set([0,1,5,11], 2, 6, r5);
+    etf_bool5, a5, b5, c5, d5 = is_ETF(gram5, case=:U);
+    @test (etf_bool5 && d5 == r5^2+r5+1)
 end
 
 @testset "BinderFinder.jl" begin
