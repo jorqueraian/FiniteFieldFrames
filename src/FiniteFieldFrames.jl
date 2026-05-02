@@ -19,14 +19,14 @@ function is_frame(gram::FqMatrix; case::Symbol)::Tuple{Bool,Union{Int64,Nothing}
     d = rank(gram);
 
     if case == :O
+        (characteristic(gram.base_ring) != 2) || throw(DomainError(gram.base_ring,"In case O, the characteristic must be odd"));
         if iszero(gram - transpose(gram))
             return (true, d)
         else
             return (false, nothing)
         end
     elseif case == :U
-        # Not needed, conjugate_transpose will throw if degree is not divisible by 2.
-        # (degree(gram.base_ring) == 2) || throw(DomainError(gram.base_ring,"in Case U, the provided field must be finite and must be a degree 2 extension"));
+        (gcd(2, degree(gram.base_ring)) == 2) || throw(DomainError(gram.base_ring,"in case U, the provided field must be finite and must be an extension of even degree"));
         if iszero(gram - conjugate_transpose(gram))
             return (true, d)
         else
@@ -41,7 +41,7 @@ function case_O_frame_discr_is_square(gram::FqMatrix)::Bool
     n = size(gram)[1];
     (n == size(gram)[2]) || throw(DomainError(size(gram),"gram must be square"));
     frame_bool, d = is_frame(gram, case=:O);
-    (frame_bool) || throw(DomainError(gram,"gram must be symmetric"));
+    (frame_bool) || throw(DomainError(gram,"gram must be symmetric, gram is not the Gram matrix of a frame in Case O"));
     
     for inds in combinations(1:n, d)
         sub_gram = gram[inds,inds];
@@ -53,6 +53,7 @@ end
 
 function is_equiangular(gram::FqMatrix; case::Symbol)::Tuple{Bool,Union{FqFieldElem,Nothing},Union{FqFieldElem,Nothing}}
     if case == :O
+        (characteristic(gram.base_ring) != 2) || throw(DomainError(gram.base_ring,"In case O, the characteristic must be odd"));
         gram_mat_modulus_sqrd = gram.^2;
     elseif case == :U
         (gcd(2, degree(gram.base_ring)) == 2) || throw(DomainError(gram.base_ring,"in Case U, the provided field must be finite and must be an extension of even degree"));
@@ -81,7 +82,7 @@ end
 
 function is_frame_tight(gram::FqMatrix)::Tuple{Bool,Union{FqFieldElem,Nothing}}
     # Note that this algorithm assumes that gram is the gram of a frame.
-    # if tight, will return tight constant and the rank.
+    # if tight, will return tight constant
     n = size(gram)[1];
     (n == size(gram)[2]) || throw(DomainError(size(gram),"gram must be square"));
 

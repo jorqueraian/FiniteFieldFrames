@@ -26,7 +26,7 @@ using Oscar
 ff = GF(5,2,"a");
 ff = GF((5^3)^2);
 ```
-You can also explicity build a quadradic extension with an irreducible polynomial of degree 2.
+You can also explicitly build a quadratic extension with an irreducible polynomial of degree 2.
 ```julia
 base_f = GF(5,2,"b");
 Kx, x = base_f["x"];
@@ -87,7 +87,7 @@ To check if a given Gram matrix `gram` is the gram matrix of a collection of equ
 ```julia
 (equiangular_bool, a, b) = is_equiangular(gram; case=case)
 ```
-Returns a boolean `equiangular_bool` and parameters `a`, the common magnatudes of the vectors, and `b` the angle. If `equiangular_bool=false` then both `a` and `b` will be `nothing`.
+Returns a boolean `equiangular_bool` and parameters `a`, the common magnitudes of the vectors, and `b` the angle. If `equiangular_bool=false` then both `a` and `b` will be `nothing`.
 
 To check if the Gram matrix of a frame `gram`, is the Gram matrix of a tight frame use
 ```julia
@@ -105,7 +105,7 @@ If `gram` is the Gram matrix of a frame, you can use
 ```julia
 Phi = reconstruct_frame_from_gram(gram; case=case)
 ```
-which will attempt to construct the corresponding frame. I am not sure I have got this one completly working yet, but I think it is atleast basically correct. In case O, the output `Phi` may live in a field extension of the field in which `gram` was defined in. The output will always be in the real model, so the the corresponding scalar product is just the dot product.
+which will attempt to construct the corresponding frame. In case O, the output `Phi` may live in a field extension of the field in which `gram` was defined in. The output will always be in the real model, so the the corresponding scalar product is just the dot product.
 
 
 ## Constructions 
@@ -121,8 +121,7 @@ gram = real_etf_to_case_O(real_dx2d_etf_from_prime_power(3^4), Int((3^4+1)/2), 7
 
 The following would construct a 7x14 ETF in Case U over the finite field of 27^2 elements.
 ```julia
-Phi = etf_from_pmod_diff_set([0,4,6,7,8,11,13], 14, 27);
-gram = conjugate_transpose(Phi)*Phi;
+gram = etf_from_pmod_diff_set([0,4,6,7,8,11,13], 14, 27);
 ```
 or the following produces a 7x18 ETF in case U over the finite field of 125^2 elements
 ```julia
@@ -131,12 +130,19 @@ p=3*k-1 # 5
 q=p^3
 # sorting not needed
 D = sort([[x for x in 0:3:(9k-1)]; 1])
-Phi = etf_from_pmod_diff_set(D, 9k, q);
+Phi = etf_from_pmod_diff_set(D, 9k, q, return_gram=false);
 gram = conjugate_transpose(Phi)*Phi;
 ```
-This method does not verify that D is a p-modular difference set.
 
+There is also functionality for construction dxd^2 ETFs in case U from Singer difference set:
+```julia
+gram = etf_from_singer_diff_set([0,1,5,11], 2, 6, 3);
+```
+would construct a 13x169 ETF over the finite field of 64^2 elements.
 
+It should be noted that this construction, in addition to the construction from p-modular difference sets, relies on having a multiplicative generator of the field.
+Since Oscar.jl is using Nemo.jl which is using FLINT, constructing a finite field with `GF(p,deg)` will attempt to instantiate a finite field using a Conway Polynomial, if possible. In which case any root of such a polynomial is a multiplicative generator.
+However Conway polynomials come from a precompiled database (see Frank Lübeck's database [here](https://www.math.rwth-aachen.de/~Frank.Luebeck/data/ConwayPol/index.html)) and if a needed Conway polynomial is not found, the finite field will be implemented using a random irreducible polynomial. In which case the resulting construction will likely not be an ETF. You can pass the argument `verify_mult_gen=true` in which case this construction will first verify that the defining polynomial is a Conway polynomial.
 
 ## Binder Finder
 Binder Finder finds the binder of a frame in Case O or U.
