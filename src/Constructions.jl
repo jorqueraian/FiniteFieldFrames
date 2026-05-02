@@ -35,26 +35,16 @@ function etf_from_pmod_diff_set(D, n, q)
     (is_prime(b)) || throw(DomainError(q, "input must be a prime power: q=p^k"));
     (gcd(n, q+1)==n) || throw(DomainError((n,q), "n must divide q+1"));
     
-    base_ff = GF(q);
+    ff = GF(q^2);
     
-    ## In general, gen will not return a multiplicative generator.
-    ## But becasue base_ff is defined over the prime subfield, it will!
-    base_ff_gen = gen(base_ff)
-    Kx, x = base_ff["x"];
-    ff = GF(x^2-base_ff_gen, "a");
-    
-    ## becasue ff is defined as a field extention, gen would give a 
-    ## generator with respect to the base_field.
-    ff_gen = nothing
-    for r in ff
-        ff_gen = r
-        findall(is_one, [r^i for i in 1:(q^2-1)]).size[1] == 1 && break
-    end
+    # when is this bad? 
+    # when is ff not using a conway polynomial?
+    ff_gen = gen(ff);
 
     findall(is_one, [ff_gen^i for i in 1:(q^2-1)]).size[1] == 1 || throw(error("Couldnt find multiplicative generator of finite field."))
 
-    w = ff_gen^Int((q^2-1)/n)
-    F = matrix(ff, [[w^(i*j) for i in 0:(n-1)] for j in 0:(n-1)])
+    w = ff_gen^Int((q^2-1)/n);
+    F = matrix(ff, [[w^(i*j) for i in 0:(n-1)] for j in 0:(n-1)]);
     F[D.+1,:]
 end
 
@@ -95,13 +85,14 @@ function etf_from_modular_hadamard(modHadamard::FqMatrix, return_gram::Bool=true
     (d == size(modHadamard)[2]) || throw(DomainError(size(modHadamard),"Modular Hadamard must be square"));
     
     ff = modHadamard.base_ring;
-    p = characteristic(ff);
-    
-    base_ff = base_field(ff);
 
     ## need root of x^2+1
     ## this means that in the base field -1 is not a square.
-    (degree(ff) == 2) || throw(DomainError(ff,"in Case U, the provided field must be finite and must be a degree 2 extension"));
+    (gcd(2, degree(ff)) == 2) || throw(DomainError(ff,"in Case U, the provided field must be finite and must be an extension of even degree"));
+    p = characteristic(ff);
+    q = Int(sqrt(size(ff)));
+    base_ff = GF(q); 
+    # there is any easier way to do this, based on p and the absolute degree.
     !is_square(base_ff(-1)) || throw(DomainError(ff,"The base field must have -1 be a non-square"));
 
     (gcd(d-8, p) == p) || throw(DomainError(characteristic(modHadamard.base_ring),"must be that d = 8 mod p"));

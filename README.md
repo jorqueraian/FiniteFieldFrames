@@ -20,24 +20,26 @@ julia> using FiniteFieldFrames; using Oscar
 ```
 
 ## Instructions for Case U
-Pick base field using Oscar(Oscar is loaded by FiniteFieldFrames.jl but not imported). Examples below:
+Case U requires the the underlying field be a field extension of even degree. You can select such a field using Oscar in a variety of ways (Oscar is loaded by FiniteFieldFrames.jl but not imported). Examples below:
 ```julia
 using Oscar
-base_f = GF(5,3,"b");
-base_f = GF(5);
+ff = GF(5,2,"a");
+ff = GF((5^3)^2);
 ```
-Build quadradic extension
+You can also explicity build a quadradic extension with an irreducible polynomial of degree 2.
 ```julia
+base_f = GF(5,2,"b");
 Kx, x = base_f["x"];
 # specify degree 2 irreducible polynomial.
 ff, a = finite_field(x^2+x+1, "a");
 ```
 Specify `case=:U` when calling functions.
-An example is the following:
+An example of constructing and using an ETF in case U is the following:
 ```julia
-base_f = GF(5);
-Kx, x = base_f["x"];
-ff, a = finite_field(x^2+x+1, "a");
+ff = GF(125^2);
+ffx, x = ff["x"];
+a = roots(x^2+x+1)[1];
+
 hessa_sic = matrix(ff, [
         1    1       1    -1 -1  -1    0   0      0;
         0    0       0     1  a  a^2  -1 -1*a   -1*a^2;
@@ -65,13 +67,16 @@ Phi = matrix(ff, [
    1 2 0  0  0  0  1  2  1  2;
    1 1 2  2  1  2  0  0  0  0     
 ])
+# Here the frame Phi is defined in F_3^4 with a scalar product whose gram is Diag(1,1,1,2).
 gram = transpose(Phi)*diagonal_matrix([ff(1),ff(1),ff(1),ff(2)])*Phi
+
+is_discr_Phi_square = case_O_frame_discr_is_square(gram);  # false
 
 binder_finder(3, gram, case=:O)
 ```
 
 ## Basic Functionality
-To check is a provided Gram matrix `gram` is the gram matrix of a frame in either case :O or :U use
+To check if a provided Gram matrix `gram` is the gram matrix of a frame in either case :O or :U use
 
 ```julia
 (frame_bool, d) = is_frame(gram; case=case)

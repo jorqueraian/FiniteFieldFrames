@@ -25,7 +25,8 @@ function is_frame(gram::FqMatrix; case::Symbol)::Tuple{Bool,Union{Int64,Nothing}
             return (false, nothing)
         end
     elseif case == :U
-        (degree(gram.base_ring) == 2) || throw(DomainError(gram.base_ring,"in Case U, the provided field must be finite and must be a degree 2 extension"));
+        # Not needed, conjugate_transpose will throw if degree is not divisible by 2.
+        # (degree(gram.base_ring) == 2) || throw(DomainError(gram.base_ring,"in Case U, the provided field must be finite and must be a degree 2 extension"));
         if iszero(gram - conjugate_transpose(gram))
             return (true, d)
         else
@@ -39,7 +40,7 @@ end
 function case_O_frame_discr_is_square(gram::FqMatrix)::Bool
     n = size(gram)[1];
     (n == size(gram)[2]) || throw(DomainError(size(gram),"gram must be square"));
-    frame_bool, d = is_frame(gram, "O");
+    frame_bool, d = is_frame(gram, case=:O);
     (frame_bool) || throw(DomainError(gram,"gram must be symmetric"));
     
     for inds in combinations(1:n, d)
@@ -54,8 +55,9 @@ function is_equiangular(gram::FqMatrix; case::Symbol)::Tuple{Bool,Union{FqFieldE
     if case == :O
         gram_mat_modulus_sqrd = gram.^2;
     elseif case == :U
-        (degree(gram.base_ring) == 2) || throw(DomainError(gram.base_ring,"in Case U, the provided field must be finite and must be a degree 2 extension"));
-        gram_mat_modulus_sqrd = norm.(gram);
+        (gcd(2, degree(gram.base_ring)) == 2) || throw(DomainError(gram.base_ring,"in Case U, the provided field must be finite and must be an extension of even degree"));
+        q = Int(sqrt(size(gram.base_ring))); # characteristic(gram.base_ring)^Int(degree(gram.base_ring)/2);
+        gram_mat_modulus_sqrd = gram.^(q+1);
     else
         throw(DomainError(case,"Case not recognized: I can only accept :O or :U"));
     end
@@ -130,7 +132,7 @@ function reconstruct_frame_from_gram(gram::FqMatrix; case::Symbol)::FqMatrix
     if case == :O
         q = 1;
     elseif case == :U
-        (degree(ff) == 2) || throw(DomainError(ff,"in Case U, the provided field must be finite and must be a degree 2 extension"));
+        (gcd(2, degree(ff)) == 2) || throw(DomainError(ff,"in Case U, the provided field must be finite and must be an extension of even degree"));
         q = Int(sqrt(size(ff)));
     end
 

@@ -71,6 +71,10 @@ end
     gram2 = conjugate_transpose(Phi)*Phi;
     etf_bool3, a3, b3, c3, d3 = is_ETF(gram2, case=:U);
     @test (etf_bool3 && d3 == 7);
+
+    gram4 = etf_from_modular_hadamard(matrix(GF((3^3)^2), [1 1; 1 -1]), true);
+    etf_bool4, a4, b4, c4, d4 = is_ETF(gram4, case=:U);
+    @test (etf_bool4 && d4 == 2);
 end
 
 @testset "BinderFinder.jl" begin
