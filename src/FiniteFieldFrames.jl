@@ -53,14 +53,14 @@ end
 
 function is_equiangular(gram::FqMatrix; case::Symbol)::Tuple{Bool,Union{FqFieldElem,Nothing},Union{FqFieldElem,Nothing}}
     if case == :O
-        (characteristic(gram.base_ring) != 2) || throw(DomainError(gram.base_ring,"In case O, the characteristic must be odd"));
+        (characteristic(gram.base_ring) != 2) || throw(DomainError(gram.base_ring,"In case=:O, the characteristic must be odd"));
         gram_mat_modulus_sqrd = gram.^2;
     elseif case == :U
         (gcd(2, degree(gram.base_ring)) == 2) || throw(DomainError(gram.base_ring,"in Case U, the provided field must be finite and must be an extension of even degree"));
         q = Int(sqrt(size(gram.base_ring))); # characteristic(gram.base_ring)^Int(degree(gram.base_ring)/2);
         gram_mat_modulus_sqrd = gram.^(q+1);
     else
-        throw(DomainError(case,"Case not recognized: I can only accept :O or :U"));
+        throw(DomainError(case,"Case not recognized: I can only accept case=:O or case=:U"));
     end
 
     n = size(gram)[1];
